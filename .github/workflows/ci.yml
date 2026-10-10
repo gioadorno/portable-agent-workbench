@@ -21,6 +21,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Windows runtime diagnostics
+        if: runner.os == 'Windows'
+        run: node --import tsx --test --test-reporter=tap --test-timeout=30000 tests/runtime.test.ts
       - run: npm test
       - run: npm run validate-skills
       - run: npm run build
