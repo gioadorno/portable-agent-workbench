@@ -1,0 +1,221 @@
+{
+  "source": "https://github.com/mattpocock/skills",
+  "revision": "49dd158d1076134a641b33efb035946536778336",
+  "categories": [
+    "engineering",
+    "productivity"
+  ],
+  "license": "MIT",
+  "namespacedSkills": [
+    "mp-ask-matt",
+    "mp-code-review",
+    "mp-codebase-design",
+    "mp-diagnosing-bugs",
+    "mp-domain-modeling",
+    "mp-grill-me",
+    "mp-grill-with-docs",
+    "mp-grilling",
+    "mp-handoff",
+    "mp-implement",
+    "mp-implement-spec",
+    "mp-improve-codebase-architecture",
+    "mp-pr",
+    "mp-prototype",
+    "mp-research",
+    "mp-retro",
+    "mp-setup-matt-pocock-skills",
+    "mp-tdd",
+    "mp-teach",
+    "mp-to-questionnaire",
+    "mp-to-spec",
+    "mp-to-tickets",
+    "mp-triage",
+    "mp-wait-what",
+    "mp-wayfinder",
+    "mp-wizard",
+    "mp-writing-for-agents"
+  ],
+  "adaptations": [
+    "mp- namespace and cross-skill references",
+    "host-neutral skill/question tool names",
+    "native delegation with sequential fallback",
+    "approved Workbench gates"
+  ],
+  "patches": [
+    {
+      "file": "skills/mp-ask-matt/PHASE-BOUNDARIES.md",
+      "sourceHash": "a8aa20158609ef39e2b308b6ba0660c91066838d07a867202e63a7744a88a3ed",
+      "adaptedHash": "e10e16749478aa6fd13af254df027e44b08e7b0b7b28667b6c91ab82517443ce"
+    },
+    {
+      "file": "skills/mp-ask-matt/SKILL.md",
+      "sourceHash": "1371f5ce005de0992a44b137748bfb960a56948aa9871b405fe9d90b24332e3c",
+      "adaptedHash": "05e10481b6abf6c86f2dcc7384827b5f3cb87189e877533229287577bca0c84d"
+    },
+    {
+      "file": "skills/mp-code-review/SKILL.md",
+      "sourceHash": "09eb147f793e4647949edd32dbad278f0554dfb56e0d46b699cd4c2c55bf0357",
+      "adaptedHash": "eb8468733e43f83a8292a13d07c20fc6fab1b3bcb2ea3fd31e6a575d8657a5bb"
+    },
+    {
+      "file": "skills/mp-codebase-design/SKILL.md",
+      "sourceHash": "2c20617f87ec8af6a434859f381b2f061a69b530444e74eb39e78bb016a6d1e2",
+      "adaptedHash": "c032ccb409fdf5a7fc1fdf94bcc0994283a7b3d7598e7fe8edfb39636e94dd5a"
+    },
+    {
+      "file": "skills/mp-diagnosing-bugs/SKILL.md",
+      "sourceHash": "849198df88cdb65fd0d97236604c1fca7ff2f22d2f705f9724a800d0266b118d",
+      "adaptedHash": "269e2ee8344cf06fb9b3a1b2050e442dc5e0ca1dc553e51f7e4d2cde846e7ca2"
+    },
+    {
+      "file": "skills/mp-domain-modeling/SKILL.md",
+      "sourceHash": "7b925d7b1e341a2eeae33ad68a8a8c0ab889a38ddd22a7598e4c240e5a7556a3",
+      "adaptedHash": "132b22f5396a863c9353907238a9e62e69f69128ab8d5da2e2fcee401285e1c3"
+    },
+    {
+      "file": "skills/mp-grill-with-docs/SKILL.md",
+      "sourceHash": "7de372c13488f1ee96cc11cd8907b56b6809cc93eef776eeddd37de6b6cbe3fe",
+      "adaptedHash": "77a25c46dadd9b1d8e3f3cf2d992798bc513a6bb2cb422c1ba504e5a545ee9a4"
+    },
+    {
+      "file": "skills/mp-implement/SKILL.md",
+      "sourceHash": "483bdc4ccf4ac31d86ac7beeaa0d0db80313e71e120bb8c59b3196ae5decd53d",
+      "adaptedHash": "ec3fc07fd9f4faa1d4c6219061812e86a9be34e4fefde24fb3e5bee28eeaa648"
+    },
+    {
+      "file": "skills/mp-implement-spec/SKILL.md",
+      "sourceHash": "7a22dd2e60b8fcece478ced9d2533582adf3520d695acd3ab715341535c9e56d",
+      "adaptedHash": "583cbfefd60137155cf6be571620f7fa161f7fb6591dc8e3139784589836e93d"
+    },
+    {
+      "file": "skills/mp-improve-codebase-architecture/HTML-REPORT.md",
+      "sourceHash": "581e8bb5a521e46bbda8ca7e19b15948bed882187108092ebb90c62513b77528",
+      "adaptedHash": "db4b6d489bde084c72a0d7eac3a5dbf3ad03ce0236f0a2d2cc84fe01c43511aa"
+    },
+    {
+      "file": "skills/mp-improve-codebase-architecture/SKILL.md",
+      "sourceHash": "552240a5ab5cec6b67c15dd1ad6e9f6962b1bca6ce870059a8c2713760c20392",
+      "adaptedHash": "48ab7d9d48ccab3c0c2b1c49d9ab78ef5f25a0481233bdf0ccc2791f9e81f003"
+    },
+    {
+      "file": "skills/mp-pr/SKILL.md",
+      "sourceHash": "ab63f1cf78647389edcd386c9427c5dfca27ed2836930c24773ffee834c19bcd",
+      "adaptedHash": "0e5997ffbf06760443be893a91170740158d43071590c5f379f74587bed8fb5a"
+    },
+    {
+      "file": "skills/mp-prototype/SKILL.md",
+      "sourceHash": "714de632d116bb73f65cdb5a882db15b9369a6713b9a47c0fad827848f0bfbe3",
+      "adaptedHash": "f9aa5d9bc3b6ae429217319a2cfb9b55cc1e47353bbbe069fbfbd77da9e2d70f"
+    },
+    {
+      "file": "skills/mp-prototype/UI.md",
+      "sourceHash": "723211e878acbc7b6ff09755263f3295cde724ba902ff0064da41eed51d45ad3",
+      "adaptedHash": "82748ef3d581cf9071cfc2f50a99538b76b34d0c5d160e5dac5622e55dde373c"
+    },
+    {
+      "file": "skills/mp-research/SKILL.md",
+      "sourceHash": "985569f15739c713d6784887c3d186d4ef9ac85bec5ad9c068d25bf0739928e4",
+      "adaptedHash": "ce054b0b7dd5e0d43f11662c65be0bfd4c6435872ff105d29a316013c9b6fc19"
+    },
+    {
+      "file": "skills/mp-retro/SKILL.md",
+      "sourceHash": "33fbc28568e3146f20fd908b12998bc0ab30aa4f4c87288199a40793efa94696",
+      "adaptedHash": "27e9e701050b3a40f4d036e87085f1ffc59538940aba059c0142c7b20750169d"
+    },
+    {
+      "file": "skills/mp-setup-matt-pocock-skills/SKILL.md",
+      "sourceHash": "f148858ffb7f63c03c06fca06e6fdb1d91a35c6b293244b8fdfacd5f4cc028c4",
+      "adaptedHash": "890386b069fc6b67307348af86163738d8d741a4ed04ba5d1fd99da2e01cac2d"
+    },
+    {
+      "file": "skills/mp-setup-matt-pocock-skills/domain.md",
+      "sourceHash": "593a7042218689f1d24df89df14eaf0a20e19e0d0a7d479a01947ac78f0784b9",
+      "adaptedHash": "2e85fe5b55f165526df843c1a7a0f9ca93640e3d98e28edcda1315cb9ddc8efb"
+    },
+    {
+      "file": "skills/mp-setup-matt-pocock-skills/issue-tracker-github.md",
+      "sourceHash": "f0653fe106dd8ee7b33be27bd7fe3104b40555896cb45f61997aed20467020c3",
+      "adaptedHash": "e6fbb9d94099c53370da676f68d6051d5b3fc2386b9484b7c4316ca4321d9a09"
+    },
+    {
+      "file": "skills/mp-setup-matt-pocock-skills/issue-tracker-gitlab.md",
+      "sourceHash": "591a9e7057382aaccdfbed3f7ea3f2ad07e0cd29f012d18b82ee4e485fd81e24",
+      "adaptedHash": "3363aa1f18d111106863b6a987672427a3113a8ec8dd938700159c3b680d45c2"
+    },
+    {
+      "file": "skills/mp-setup-matt-pocock-skills/issue-tracker-local.md",
+      "sourceHash": "7dcda20a2eb4bdc89b95d1143423c0691309921cadae3132e6424f371030506e",
+      "adaptedHash": "9b9ce1af3585618c9ef0f1ed396251a73fbf0a4b9642d27910488f40bf40b530"
+    },
+    {
+      "file": "skills/mp-tdd/SKILL.md",
+      "sourceHash": "5505d25bbaa8fc14a79e4d20163936958992a2995b7f1dd1d6197edc9ed722e0",
+      "adaptedHash": "9aed8a81318d1d335ddd823ddb7dfc3fd5bfb1362166ddd04791f10b23a17778"
+    },
+    {
+      "file": "skills/mp-to-spec/SKILL.md",
+      "sourceHash": "43ad9cf318e5e7d3d1fa360253a37021796dc87a0c2e595ad262661a10f85088",
+      "adaptedHash": "d58b7a8314ce9591ce2351cec10bc0d5cd9159d544440d4acd1704c2f1731065"
+    },
+    {
+      "file": "skills/mp-to-tickets/SKILL.md",
+      "sourceHash": "56ec23c5b2782785d4e65bff9e315b6d3aeb4ef977c174a219e99489fada1995",
+      "adaptedHash": "da90cb521fca79559445b98f0ee95a9a340f73176c7e6841d0f737cdf21bf488"
+    },
+    {
+      "file": "skills/mp-triage/AGENT-BRIEF.md",
+      "sourceHash": "7f5f87fed3033df1b06e083c480f3e847b1fbb0647746b8a4c6a50f9f26ef44f",
+      "adaptedHash": "58d77a9e9d477422793187b02ace4a049607ef9ac076f9077884e61fccd51814"
+    },
+    {
+      "file": "skills/mp-triage/SKILL.md",
+      "sourceHash": "917b0baf74be583e74f110857ed45df2766617f75c00baf61fd136d7af515edf",
+      "adaptedHash": "70f5876ed5baa3b98e0579afbd5946a0c099bf5feb46755bd747ed572c2604e5"
+    },
+    {
+      "file": "skills/mp-wayfinder/SKILL.md",
+      "sourceHash": "9be7b478c389605a24517d27752f278933588da97a1b5921b165f455edf4c5b7",
+      "adaptedHash": "07b297d06d16fea9a6a8d46f8e3b974d977e39619fafcf86465430cd553ba461"
+    },
+    {
+      "file": "skills/mp-wizard/SKILL.md",
+      "sourceHash": "bdf31d48211ea559878f95a4f344aeabf8d85897488ba564382bab0b000daac1",
+      "adaptedHash": "95ac942313d4a0a38f1b92c871f9eedb2ba18966daf9520b06e9178f9e50cc4a"
+    },
+    {
+      "file": "skills/mp-grill-me/SKILL.md",
+      "sourceHash": "caaf8b8de1684f96e26b28f3c29189db5c89cce4b73e1c93d86164f66ef88637",
+      "adaptedHash": "de2365f83dd0765bcc3b41db100b06bee9b1c72d62a57b098d3f9bd369853bce"
+    },
+    {
+      "file": "skills/mp-grilling/SKILL.md",
+      "sourceHash": "befdff1e27a1dfe2a294d5871169ac1afe16d983911daa4f32627514a48c1e15",
+      "adaptedHash": "79ebf6e66b44b557c8440667231a485912c88f5f35ff4169953dbbd09ff730d9"
+    },
+    {
+      "file": "skills/mp-handoff/SKILL.md",
+      "sourceHash": "4cbb043950dad2ffd3662ff1a5a0b51ae676004b5cae10e3787e8ee7a4ee69d3",
+      "adaptedHash": "1ff48601f44bc146111ac5b1dc43d46e77f013030d69a2c21c66fc3194c3b53f"
+    },
+    {
+      "file": "skills/mp-teach/SKILL.md",
+      "sourceHash": "550482c2d674b085c9043b87bfdc14a8f2ec453c736119e7fcbb1e9332bffeba",
+      "adaptedHash": "f554ed9d865a694cd705a5bc97ce02f59c5be7df2d6f2d482c3039fe6e934074"
+    },
+    {
+      "file": "skills/mp-to-questionnaire/SKILL.md",
+      "sourceHash": "b5eb929842ee0e93d867c5e906d183d350f2f2d149eaeaa86967d94d8eda1d3b",
+      "adaptedHash": "bfc36bd863126ac2e3779e6b5e4241187dbc2b8c82ca0ab161b4f5e9a6662fea"
+    },
+    {
+      "file": "skills/mp-wait-what/SKILL.md",
+      "sourceHash": "d961bb37defd975c539427edb8f450cdbccdcdd552e213c1ece46676a7970905",
+      "adaptedHash": "e78f65e03ae1e5019b94382a9f728a6c45cc34e42248d05bff5231024597a2d8"
+    },
+    {
+      "file": "skills/mp-writing-for-agents/SKILL.md",
+      "sourceHash": "551adca942227b44192edba88acd4e8db911f0121ce58ad16944ccf6a896a74a",
+      "adaptedHash": "54ef0598c3c53285f8d6d47d83a89e358a8b5c79d9edf243a634557860cb7216"
+    }
+  ]
+}

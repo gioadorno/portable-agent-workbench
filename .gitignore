@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.tgz
+.agentkit/state.sqlite*
+.agentkit/artifacts/
+.agentkit/worktrees/
+.agentkit/quarantine/
+.agentkit/backups/
+.agentkit/approval-key
+.agentkit/approvals/
+.env*
+!.env.example
+coverage/

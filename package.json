@@ -1,0 +1,46 @@
+{
+  "name": "portable-agent-workbench",
+  "version": "0.1.0",
+  "description": "Local project memory and verification for host-led coding agents",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "agent-workbench": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "skills",
+    "upstream",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node scripts/run-tests.mjs",
+    "check": "tsc --noEmit -p tsconfig.json",
+    "validate-skills": "node --import tsx scripts/validate-skills.ts",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "better-sqlite3": "^12.6.0",
+    "smol-toml": "^1.9.1",
+    "yaml": "^2.8.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.19.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gioadorno/portable-agent-workbench.git"
+  }
+}
