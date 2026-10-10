@@ -42,3 +42,7 @@ test('Git integration protects dirty user files and stale base',t=>{
  const root=repo(t);const base=git(root,'rev-parse','HEAD');const wt=createWorktree(root,'sample','abcdef0123');writeFileSync(path.join(wt,'a.txt'),'fixed\n');git(wt,'add','a.txt');git(wt,'commit','-m','fix');const snap=captureCandidate(root,wt,base);
  writeFileSync(path.join(root,'private.txt'),'user work');assert.throws(()=>integrateCandidate(root,snap),/dirty|clean/i);assert.equal(readFileSync(path.join(root,'private.txt'),'utf8'),'user work');rmSync(path.join(root,'private.txt'));writeFileSync(path.join(root,'b.txt'),'other task');git(root,'add','b.txt');git(root,'commit','-m','other');assert.throws(()=>integrateCandidate(root,snap),/base|stale/i);
 });
+
+test('candidate repository identity rejects a nested unrelated Git repository',t=>{
+ const root=repo(t);const base=git(root,'rev-parse','HEAD');const foreign=path.join(root,'.agentkit','worktrees','foreign');mkdirSync(foreign,{recursive:true});git(foreign,'init','-b','main');git(foreign,'config','user.name','Fixture');git(foreign,'config','user.email','fixture@example.invalid');writeFileSync(path.join(foreign,'a.txt'),'unrelated');git(foreign,'add','.');git(foreign,'commit','-m','unrelated');assert.throws(()=>captureCandidate(root,foreign,base),/another repository|identity/i);
+});

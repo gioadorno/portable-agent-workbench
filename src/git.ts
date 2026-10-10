@@ -1,5 +1,5 @@
 import {execFileSync} from 'node:child_process';
-import {mkdirSync,realpathSync,existsSync,writeFileSync,unlinkSync,readFileSync} from 'node:fs';
+import {mkdirSync,realpathSync,existsSync,writeFileSync,unlinkSync,readFileSync,statSync} from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {confinedPath} from './security.js';
@@ -18,7 +18,8 @@ export function captureCandidate(root:string,worktree:string,baseCommit:string):
  validateCommit(baseCommit);const resolved=confinedPath(root,path.relative(realpathSync(root),realpathSync(worktree)).split(path.sep).join('/'),true);
  const common=realpathSync(path.resolve(root,git(root,'rev-parse','--git-common-dir').trim()));
  const candidateCommon=realpathSync(path.resolve(resolved,git(resolved,'rev-parse','--git-common-dir').trim()));
- if(common!==candidateCommon)throw new Error('Candidate belongs to another repository');
+ const owner=statSync(common,{bigint:true}),candidateOwner=statSync(candidateCommon,{bigint:true});
+ if(!owner.isDirectory()||!candidateOwner.isDirectory()||owner.ino===0n||owner.dev!==candidateOwner.dev||owner.ino!==candidateOwner.ino)throw new Error('Candidate belongs to another repository or filesystem identity is unavailable');
  if(!gitClean(resolved))throw new Error('Candidate worktree must be clean and committed');
  git(resolved,'merge-base','--is-ancestor',baseCommit,'HEAD');
  const headCommit=gitHead(resolved);const treeHash=git(resolved,'rev-parse','HEAD^{tree}').trim();
