@@ -10,7 +10,8 @@ import {sha256} from './policy.js';
 export class WorkbenchService {
  readonly core:Workbench;
  private readonly validations=new Map<AbortController,Promise<void>>();
- constructor(readonly root:string){this.core=new Workbench(root);}
+ readonly root:string;
+ constructor(root:string){this.core=new Workbench(root);this.root=this.core.root;}
  close(){for(const controller of this.validations.keys())controller.abort(new Error('Validation aborted: service stopped'));this.core.close();}
  async shutdown(){for(const controller of this.validations.keys())controller.abort(new Error('Validation aborted: session stopped'));await Promise.allSettled([...this.validations.values()]);this.core.close();}
  claim(id:string,worker:WorkerIdentity){

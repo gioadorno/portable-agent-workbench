@@ -1,6 +1,6 @@
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, rmSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, rmSync, symlinkSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -14,7 +14,7 @@ const roots: string[] = [];
 const instances: Workbench[] = [];
 afterEach(() => { for (const w of instances.splice(0)) w.close(); for (const r of roots.splice(0)) rmSync(r, { recursive: true, force: true }); });
 function fixture() {
-  const root = mkdtempSync(join(tmpdir(), 'workbench-core-')); roots.push(root);
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'workbench-core-'))); roots.push(root);
   initializeProject(root); const profile = readProfile(root); profile.commands.unit = { argv: [process.execPath, '--test'], cwd: '.', timeoutMs: 10000 }; writeFileSync(join(root, PROFILE_FILE), JSON.stringify(profile)); writeFileSync(join(root, 'PLAN.md'), 'Implement approved tasks.\n');
   const w = new Workbench(root); instances.push(w); w.approvePlan('PLAN.md');
   return { root, w };
@@ -316,4 +316,10 @@ test('recorded decision changes invalidate checks reviews and dependent readines
  const {root,w}=fixture();w.recordDecision({id:'D',text:'First decision',rationale:'Original constraint'});w.createTask(task());const claim=w.claimTask('T1',worker);const snap=candidate(root);w.submitTask(claim.token,snap);evidence(w,root,claim.token,snap);review(w,'T1',snap);w.markVerified('T1');
  w.recordDecision({id:'D',text:'Changed decision',rationale:'New constraint'});w.recordDecision({id:'D',text:'First decision',rationale:'Original constraint'});assert.equal(w.getTask('T1').status,'stale');assert.throws(()=>w.markVerified('T1'),/stale|review/i);w.submitTask(claim.token,snap);review(w,'T1',snap);assert.throws(()=>w.markVerified('T1'),/stale|check/i);
  evidence(w,root,claim.token,snap);w.markVerified('T1');w.integrateTask(claim.token,snap);w.recordDecision({id:'D',text:'Another constraint',rationale:'Revalidate existing implementation'});assert.equal(w.getTask('T1').status,'stale');assert.doesNotThrow(()=>w.claimTask('T1',{...worker,sessionId:'revalidation'}));
+});
+
+test('registered root aliases accept their own canonical worktrees but still reject outside paths',()=>{
+ const {root}=fixture();const aliases=mkdtempSync(join(tmpdir(),'aw-alias-'));try{
+ const alias=join(aliases,'project');symlinkSync(root,alias,process.platform==='win32'?'junction':'dir');const w=new Workbench(alias);try{w.approvePlan('PLAN.md');w.createTask(task());const claim=w.claimTask('T1',worker);const snap=candidate(alias);assert.doesNotThrow(()=>w.submitTask(claim.token,snap));assert.equal(w.getTask('T1').candidate!.worktree,realpathSync(snap.worktree));}finally{w.close();}
+ }finally{rmSync(aliases,{recursive:true,force:true});}
 });

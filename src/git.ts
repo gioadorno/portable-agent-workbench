@@ -15,7 +15,7 @@ export function createWorktree(root:string,taskId:string,token:string):string {
  git(root,'worktree','add','-b',`agentkit/${suffix}`,target,'HEAD');return target;
 }
 export function captureCandidate(root:string,worktree:string,baseCommit:string):CandidateSnapshot {
- validateCommit(baseCommit);const resolved=confinedPath(root,path.relative(root,worktree).split(path.sep).join('/'),true);
+ validateCommit(baseCommit);const resolved=confinedPath(root,path.relative(realpathSync(root),realpathSync(worktree)).split(path.sep).join('/'),true);
  const common=realpathSync(path.resolve(root,git(root,'rev-parse','--git-common-dir').trim()));
  const candidateCommon=realpathSync(path.resolve(resolved,git(resolved,'rev-parse','--git-common-dir').trim()));
  if(common!==candidateCommon)throw new Error('Candidate belongs to another repository');
@@ -41,7 +41,7 @@ export function integrationLock<T>(root:string,action:()=>T):T {
 }
 
 export function rebaseCandidate(root:string,worktree:string):string {
- const candidate=confinedPath(root,path.relative(root,worktree).split(path.sep).join('/'),true);
+ const candidate=confinedPath(root,path.relative(realpathSync(root),realpathSync(worktree)).split(path.sep).join('/'),true);
  if(!gitClean(candidate))throw new Error('Commit candidate changes before rebase');
  const base=gitHead(root);validateCommit(base);
  git(candidate,'rebase','--no-autostash',base);return base;
