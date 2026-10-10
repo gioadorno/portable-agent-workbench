@@ -4,7 +4,7 @@
 
 TypeScript CLI and local stdio MCP share transactional SQLite task ownership, scoped Git worktrees, approval snapshots, persistent memory generations, bounded argv checks, independent review gates, checkpoint/recovery, current-checkout readiness, JSON/Markdown inspection exports, and non-destructive Codex/OpenCode installation.
 
-- 74 local tests pass on Linux/Node 22.22.2, including actual concurrent-process claim racing, CLI SIGTERM descendant cleanup, MCP client-disconnect cancellation, restored-policy/decision fencing, stale evidence, independent review, traversal/symlinks/argv injection, and installation preservation.
+- 77 local tests pass on Linux/Node 22.22.2, including actual concurrent-process claim racing, CLI SIGTERM descendant cleanup, MCP client-disconnect cancellation, restored-policy/decision fencing, stale evidence, independent review, traversal/symlinks/argv injection, and installation preservation.
 - TypeScript check and build pass.
 - All 28 bundled skills validate: 27 upstream engineering/productivity skills at `49dd158d1076134a641b33efb035946536778336`, plus the workbench skill. Originals, upstream MIT license, attribution, adaptation patches and integrity hashes are retained.
 - npm production dependency audit reports zero known vulnerabilities.

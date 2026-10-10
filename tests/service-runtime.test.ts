@@ -12,14 +12,19 @@ import * as Git from '../src/git.js';
 import {Client} from '@modelcontextprotocol/sdk/client/index.js';
 import {StdioClientTransport} from '@modelcontextprotocol/sdk/client/stdio.js';
 
+// Release clients and SQLite handles before deleting their fixture directories.
+const cleanup = new WeakMap<test.TestContext, Array<()=>unknown>>();
+function after(t:test.TestContext, action:()=>unknown){
+ let actions=cleanup.get(t);if(!actions){actions=[];cleanup.set(t,actions);t.after(async()=>{for(const dispose of actions!.reverse())await dispose();});}actions.push(action);
+}
 function git(root: string, ...args: string[]): string { return execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim(); }
 function fixture(t: test.TestContext, duration = 2800, leaseMs = 2000) {
-  const root = mkdtempSync(path.join(tmpdir(), 'aw-service-runtime-')); t.after(() => rmSync(root, { recursive: true, force: true }));
+  const root = mkdtempSync(path.join(tmpdir(), 'aw-service-runtime-')); after(t,() => rmSync(root, { recursive: true, force: true }));
   const marker = path.join(root, '.agentkit/artifacts/child-completed.txt');
   const profile = defaultProfile(); profile.policy.leaseMs = leaseMs; profile.commands.unit = { argv: [process.execPath, '-e', `require('node:fs').writeFileSync(process.argv[1]+'.started', 'started');setTimeout(() => { require('node:fs').writeFileSync(process.argv[1], 'completed'); console.log('validation passed'); }, ${duration})`, marker], cwd: '.', timeoutMs: 10000 };
   initializeProject(root, profile); mkdirSync(path.join(root, '.agentkit/artifacts'), { recursive: true }); writeFileSync(path.join(root, 'PLAN.md'), 'Fix source'); writeFileSync(path.join(root, 'source.cjs'), 'module.exports=1;\n');
   git(root, 'init', '-b', 'main'); git(root,'config','core.autocrlf','false'); git(root, 'config', 'user.name', 'Fixture'); git(root, 'config', 'user.email', 'fixture@example.invalid'); git(root, 'add', '.'); git(root, 'commit', '-m', 'base');
-  const service = new WorkbenchService(root); t.after(() => service.close()); service.core.approvePlan('PLAN.md');
+  const service = new WorkbenchService(root); after(t,() => service.close()); service.core.approvePlan('PLAN.md');
   service.core.createTask({ id: 'T1', title: 'Fix value', requirement: 'Export correct output', acceptance: ['Output is 2'], dependencies: [], scope: ['source.cjs'], requiredChecks: ['unit'] });
   const claim = service.claim('T1', { host: 'codex', sessionId: 'builder', workerId: 'worker', role: 'implementer' });
   writeFileSync(path.join(claim.worktree!, 'source.cjs'), 'module.exports=2;\n'); git(claim.worktree!, 'add', 'source.cjs'); git(claim.worktree!, 'commit', '-m', 'fix'); service.submit(claim.token);
@@ -41,7 +46,7 @@ test('policy revocation during validation aborts the child before its delayed ef
   await new Promise(resolve => setTimeout(resolve, 2700)); assert.equal(existsSync(marker), false); assert.throws(() => service.core.assertApproved(), /approval/i);
 });
 test('runner AbortSignal terminates the subprocess and records failed evidence', async t => {
-  const root = mkdtempSync(path.join(tmpdir(), 'aw-abort-')); t.after(() => rmSync(root, { recursive: true, force: true }));
+  const root = mkdtempSync(path.join(tmpdir(), 'aw-abort-')); after(t,() => rmSync(root, { recursive: true, force: true }));
   const controller = new AbortController(); const marker = path.join(root, 'completed'); const timer = setTimeout(() => controller.abort(new Error('Policy revoked')), 40);
   try {
     const evidence = await runCommand(root, 'cancel', { argv: [process.execPath, '-e', "setTimeout(() => require('node:fs').writeFileSync(process.argv[1], 'done'), 400)", marker], cwd: '.', timeoutMs: 2000 }, { treeHash: 'tree', diffHash: 'diff' }, 65536, { signal: controller.signal });
@@ -56,7 +61,7 @@ test('integration reconciliation rejects dirty project files without accepting s
   assert.throws(() => service.reconcileIntegration(claim.token, true), /dirty|clean/i); assert.equal(service.core.getTask('T1').status, 'verified'); assert.equal(readFileSync(path.join(root, 'user-draft.txt'), 'utf8'), 'Preserve user work');
 });
 test('integration lock recovery requires stopped worker and rejects a live owner PID', t => {
-  const root = mkdtempSync(path.join(tmpdir(), 'aw-lock-recover-')); t.after(() => rmSync(root, { recursive: true, force: true })); initializeProject(root);
+  const root = mkdtempSync(path.join(tmpdir(), 'aw-lock-recover-')); after(t,() => rmSync(root, { recursive: true, force: true })); initializeProject(root);
   const lock = path.join(root, '.agentkit/integration.lock'); writeFileSync(lock, `${process.pid}\n`);
   assert.throws(() => Git.recoverIntegrationLock(root, false), /stopped/i); assert.throws(() => Git.recoverIntegrationLock(root, true), /live|running/i); assert.equal(existsSync(lock), true);
   const deadPid = execFileSync(process.execPath, ['-e', 'console.log(process.pid)'], { encoding: 'utf8' }).trim(); writeFileSync(lock, `${deadPid}\n`);
@@ -82,7 +87,7 @@ test('CLI SIGTERM awaits validation termination before process exit',{skip:proce
  const {root,claim,marker}=fixture(t,1500,10000);const packageRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
  const child=spawn(process.execPath,['--import','tsx',path.join(packageRoot,'src/cli.ts'),'--project',root,'verify','--token',claim.token,'--check','unit'],{cwd:packageRoot,stdio:['ignore','pipe','pipe']});
  let stderr='';child.stderr.on('data',chunk=>stderr+=chunk);child.stdout.resume();const exited=new Promise<number|null>((resolve,reject)=>{child.once('error',reject);child.once('exit',code=>resolve(code));});
- t.after(()=>{if(child.exitCode===null)child.kill('SIGKILL');});
+ after(t,()=>{if(child.exitCode===null)child.kill('SIGKILL');});
  const limit=Date.now()+10000;while(!existsSync(marker+'.started')&&Date.now()<limit&&child.exitCode===null)await new Promise(resolve=>setTimeout(resolve,20));
  assert.equal(existsSync(marker+'.started'),true,stderr);child.kill('SIGTERM');assert.equal(await exited,143);
  await new Promise(resolve=>setTimeout(resolve,1700));assert.equal(existsSync(marker),false,'validation child must not outlive graceful CLI shutdown');
@@ -90,7 +95,7 @@ test('CLI SIGTERM awaits validation termination before process exit',{skip:proce
 
 test('MCP client disconnect aborts active validation rather than leaving an orphan',async t=>{
  const {root,claim,marker}=fixture(t,1500,10000);const packageRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
- const transport=new StdioClientTransport({command:process.execPath,args:['--import','tsx',path.join(packageRoot,'src/cli.ts'),'--project',root,'mcp'],cwd:packageRoot,stderr:'pipe'});const client=new Client({name:'disconnect-test',version:'1'});t.after(async()=>client.close());await client.connect(transport);
+ const transport=new StdioClientTransport({command:process.execPath,args:['--import','tsx',path.join(packageRoot,'src/cli.ts'),'--project',root,'mcp'],cwd:packageRoot,stderr:'pipe'});const client=new Client({name:'disconnect-test',version:'1'});after(t,async()=>client.close());await client.connect(transport);
  const validating=client.callTool({name:'verify_task',arguments:{token:claim.token,checkId:'unit'}}).catch(error=>error);const limit=Date.now()+10000;
  while(!existsSync(marker+'.started')&&Date.now()<limit)await new Promise(resolve=>setTimeout(resolve,20));assert.equal(existsSync(marker+'.started'),true);
  await client.close();await validating;await new Promise(resolve=>setTimeout(resolve,1700));assert.equal(existsSync(marker),false,'disconnected host must not retain a running validator');

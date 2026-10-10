@@ -1,7 +1,7 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, statSync } from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { assertProjectRepository, gitHead } from './git.js';
 import { z } from 'zod';
 import { confinedPath, redact } from './security.js';
 import { initializeProject, readProfile, sha256, PROFILE_FILE, matchesScope, scopesOverlap, validateScope } from './policy.js';
@@ -126,7 +126,7 @@ export class Workbench {
       if (active.some(c => scopesOverlap(task.scope, this.rawTask(c.taskId).scope))) throw new Error('Task scope overlaps an active worker scope');
       const claim: ClaimRecord = { token: token(), taskId: id, worker, expiresAt: Date.now() + profile.policy.leaseMs };
       if (worktree) claim.worktree = this.worktreePath(worktree);
-      if (existsSync(path.join(this.root, '.git'))) { try { claim.baseCommit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: this.root, encoding: 'utf8', timeout: 5000 }).trim(); } catch { throw new Error('Cannot capture claim base Git commit'); } }
+      if (existsSync(path.join(this.root, '.git'))) { try { claim.baseCommit = (assertProjectRepository(this.root), gitHead(this.root)); } catch { throw new Error('Cannot capture claim base Git commit'); } }
       this.store.db.prepare('INSERT INTO claims(token,task_id,data) VALUES(?,?,?)').run(claim.token, id, JSON.stringify(claim));
       task.status = 'claimed'; this.writeTask(task); this.store.event('task.claimed', { worker, expiresAt: claim.expiresAt }, id); return clone(claim);
     });
@@ -146,7 +146,7 @@ export class Workbench {
     return this.transaction(() => {
       const claim = this.activeClaim(claimToken);
       if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(baseCommit) || !existsSync(path.join(this.root, '.git'))) throw new Error('Rebase base must be current project Git HEAD');
-      const head = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: this.root, encoding: 'utf8', timeout: 5000 }).trim();
+      const head = (assertProjectRepository(this.root), gitHead(this.root));
       if (baseCommit !== head) throw new Error('Rebase base commit differs from current project Git HEAD');
       const task = this.rawTask(claim.taskId); claim.baseCommit = baseCommit;
       this.store.db.prepare('UPDATE claims SET data=? WHERE token=? AND revoked=0 AND released=0').run(JSON.stringify(claim), claimToken);

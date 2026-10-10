@@ -4,22 +4,32 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {confinedPath} from './security.js';
 import type {CandidateSnapshot} from './types.js';
-function git(cwd:string,...args:string[]):string {return execFileSync('git',args,{cwd,encoding:'utf8',maxBuffer:16*1024*1024,env:{...process.env,GIT_OPTIONAL_LOCKS:'0',GIT_TERMINAL_PROMPT:'0'}}).trimEnd();}
+function git(cwd:string,...args:string[]):string {return execFileSync('git',args,{cwd,encoding:'utf8',maxBuffer:16*1024*1024,env:{...Object.fromEntries(Object.entries(process.env).filter(([key])=>!key.toUpperCase().startsWith('GIT_'))),GIT_OPTIONAL_LOCKS:'0',GIT_TERMINAL_PROMPT:'0'}}).trimEnd();}
+function commonDirectory(root:string){return realpathSync(path.resolve(root,git(root,'rev-parse','--git-common-dir').trim()));}
+export function assertProjectRepository(root:string):string {
+ const canonical=realpathSync(root);const top=realpathSync(git(canonical,'rev-parse','--show-toplevel').trim());
+ if(path.relative(canonical,top)!=='')throw new Error('Registered root must be the Git top-level directory');
+ const common=commonDirectory(canonical),metadata=realpathSync(git(canonical,'rev-parse','--absolute-git-dir').trim());
+ for(const directory of [common,metadata]){try{confinedPath(canonical,path.relative(canonical,directory).split(path.sep).join('/'),true);}catch{throw new Error('Git metadata must remain within the registered root');}if(!statSync(directory).isDirectory())throw new Error('Git metadata must be a directory within the registered root');}
+ return common;
+}
+function assertSameRepository(common:string,candidate:string){
+ const owner=statSync(common,{bigint:true}),candidateOwner=statSync(commonDirectory(candidate),{bigint:true});
+ if(!owner.isDirectory()||!candidateOwner.isDirectory()||owner.ino===0n||owner.dev!==candidateOwner.dev||owner.ino!==candidateOwner.ino)throw new Error('Candidate belongs to another repository or filesystem identity is unavailable');
+}
 export function gitHead(root:string){return git(root,'rev-parse','HEAD').trim();}
 export function gitClean(root:string){return git(root,'status','--porcelain','--untracked-files=all')==='';}
 function sha(value:string){return createHash('sha256').update(value).digest('hex');}
 function validateCommit(commit:string){if(!/^[a-f0-9]{40,64}$/.test(commit))throw new Error('Expected exact Git commit hash');}
 export function createWorktree(root:string,taskId:string,token:string):string {
+ assertProjectRepository(root);
  const suffix=sha(`${taskId}:${token}`).slice(0,20);const dir=confinedPath(root,'.agentkit/worktrees');mkdirSync(dir,{recursive:true});
  const target=confinedPath(root,`.agentkit/worktrees/${suffix}`);if(existsSync(target))throw new Error('Worktree already exists');
  git(root,'worktree','add','-b',`agentkit/${suffix}`,target,'HEAD');return target;
 }
 export function captureCandidate(root:string,worktree:string,baseCommit:string):CandidateSnapshot {
  validateCommit(baseCommit);const resolved=confinedPath(root,path.relative(realpathSync(root),realpathSync(worktree)).split(path.sep).join('/'),true);
- const common=realpathSync(path.resolve(root,git(root,'rev-parse','--git-common-dir').trim()));
- const candidateCommon=realpathSync(path.resolve(resolved,git(resolved,'rev-parse','--git-common-dir').trim()));
- const owner=statSync(common,{bigint:true}),candidateOwner=statSync(candidateCommon,{bigint:true});
- if(!owner.isDirectory()||!candidateOwner.isDirectory()||owner.ino===0n||owner.dev!==candidateOwner.dev||owner.ino!==candidateOwner.ino)throw new Error('Candidate belongs to another repository or filesystem identity is unavailable');
+ const common=assertProjectRepository(root);assertSameRepository(common,resolved);
  if(!gitClean(resolved))throw new Error('Candidate worktree must be clean and committed');
  git(resolved,'merge-base','--is-ancestor',baseCommit,'HEAD');
  const headCommit=gitHead(resolved);const treeHash=git(resolved,'rev-parse','HEAD^{tree}').trim();
@@ -29,6 +39,7 @@ export function captureCandidate(root:string,worktree:string,baseCommit:string):
  return {baseCommit,headCommit,treeHash,diffHash:sha(diff),files,worktree:resolved};
 }
 export function integrateCandidate(root:string,snapshot:CandidateSnapshot):void {
+ assertProjectRepository(root);
  validateCommit(snapshot.headCommit);validateCommit(snapshot.baseCommit);
  if(!gitClean(root))throw new Error('Integration requires a clean checkout; preserve dirty user files');
  if(gitHead(root)!==snapshot.baseCommit)throw new Error('Stale integration base; rebase candidate and obtain fresh review');
@@ -43,6 +54,7 @@ export function integrationLock<T>(root:string,action:()=>T):T {
 
 export function rebaseCandidate(root:string,worktree:string):string {
  const candidate=confinedPath(root,path.relative(realpathSync(root),realpathSync(worktree)).split(path.sep).join('/'),true);
+ assertSameRepository(assertProjectRepository(root),candidate);
  if(!gitClean(candidate))throw new Error('Commit candidate changes before rebase');
  const base=gitHead(root);validateCommit(base);
  git(candidate,'rebase','--no-autostash',base);return base;

@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {runCommand} from '../src/runner.js';
-import {captureCandidate, createWorktree, integrateCandidate} from '../src/git.js';
+import {captureCandidate, createWorktree, integrateCandidate, rebaseCandidate, gitHead} from '../src/git.js';
 function temp(t:test.TestContext){const p=mkdtempSync(path.join(tmpdir(),'aw-runtime-')); t.after(()=>rmSync(p,{recursive:true,force:true}));return p;}
 const fingerprint={treeHash:'tree',diffHash:'diff'};
 test('validation argv never expands shell substitutions or injected separators',async t=>{
@@ -45,4 +45,17 @@ test('Git integration protects dirty user files and stale base',t=>{
 
 test('candidate repository identity rejects a nested unrelated Git repository',t=>{
  const root=repo(t);const base=git(root,'rev-parse','HEAD');const foreign=path.join(root,'.agentkit','worktrees','foreign');mkdirSync(foreign,{recursive:true});git(foreign,'init','-b','main');git(foreign,'config','user.name','Fixture');git(foreign,'config','user.email','fixture@example.invalid');writeFileSync(path.join(foreign,'a.txt'),'unrelated');git(foreign,'add','.');git(foreign,'commit','-m','unrelated');assert.throws(()=>captureCandidate(root,foreign,base),/another repository|identity/i);
+});
+
+test('primary linked worktrees and nested project folders cannot mutate external Git metadata',t=>{
+ const root=repo(t);const linked=temp(t);git(root,'worktree','add',linked,'-b','external-fixture');const before=git(root,'worktree','list','--porcelain');
+ assert.throws(()=>createWorktree(linked,'escape','token'),/metadata|registered root|outside/i);assert.equal(git(root,'worktree','list','--porcelain'),before);
+ const nested=path.join(root,'nested');mkdirSync(nested);assert.throws(()=>createWorktree(nested,'escape','token'),/registered root|top.level/i);assert.equal(git(root,'worktree','list','--porcelain'),before);
+});
+test('foreign candidate rebase is rejected before modifying its repository',t=>{
+ const root=repo(t);const foreign=path.join(root,'.agentkit','foreign');mkdirSync(foreign,{recursive:true});git(foreign,'init','-b','main');git(foreign,'config','user.name','Fixture');git(foreign,'config','user.email','fixture@example.invalid');writeFileSync(path.join(foreign,'b.txt'),'foreign');git(foreign,'add','.');git(foreign,'commit','-m','foreign');const before=git(foreign,'rev-parse','HEAD');
+ assert.throws(()=>rebaseCandidate(root,foreign),/another repository|identity/i);assert.equal(git(foreign,'rev-parse','HEAD'),before);
+});
+test('inherited Git routing variables cannot redirect toolkit repository operations',t=>{
+ const root=repo(t),foreign=repo(t);writeFileSync(path.join(foreign,'b.txt'),'foreign');git(foreign,'add','.');git(foreign,'commit','-m','foreign');const expected=git(root,'rev-parse','HEAD');const old=process.env.GIT_DIR;process.env.GIT_DIR=path.join(foreign,'.git');try{assert.equal(gitHead(root),expected);}finally{if(old===undefined)delete process.env.GIT_DIR;else process.env.GIT_DIR=old;}
 });
